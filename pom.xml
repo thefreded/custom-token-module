@@ -13,11 +13,15 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
-        <quarkus.platform.version>3.22.2</quarkus.platform.version>
+        <quarkus.platform.version>3.20.0</quarkus.platform.version>
         <skipITs>true</skipITs>
         <surefire-plugin.version>3.5.2</surefire-plugin.version>
         <lombok.version>1.18.34</lombok.version>
-        <quarkus-oidc.version>3.20.0</quarkus-oidc.version>
+        <quarkus-rest.version>3.20.0</quarkus-rest.version>
+        <quarkus-oidc-client.version>3.20.0</quarkus-oidc-client.version>
+        <quarkus-arc.version>3.20.0</quarkus-arc.version>
+        <quarkus-rest-client-jackson.version>3.20.0</quarkus-rest-client-jackson.version>
+        <quarkus-rest-jackson.version>3.20.0</quarkus-rest-jackson.version>
     </properties>
 
     <dependencyManagement>
@@ -32,39 +36,42 @@
         </dependencies>
     </dependencyManagement>
 
-
     <dependencies>
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-rest</artifactId>
+            <version>${quarkus-rest.version}</version>
         </dependency>
+
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-arc</artifactId>
+            <version>${quarkus-arc.version}</version>
         </dependency>
-
 
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-rest-client-jackson</artifactId>
+            <version>${quarkus-rest-client-jackson.version}</version>
         </dependency>
+
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-rest-jackson</artifactId>
+            <version>${quarkus-rest-jackson.version}</version>
         </dependency>
 
 
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-oidc-client</artifactId>
+            <version>${quarkus-oidc-client.version}</version>
         </dependency>
-
 
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
 
