@@ -16,6 +16,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -28,20 +29,22 @@ public class TokenService {
     private final String clientId;
     private final String clientSecret;
     private final OidcClient defaultClient;
+    private final String scope;
     private volatile AccessTokenCache clientToken;
 
     @Inject
-    public TokenService(
-            @ConfigProperty(name = "quarkus.oidc.auth-server-url") String authServerUrl,
-            @ConfigProperty(name = "keycloak.realm") String realm,
-            @ConfigProperty(name = "quarkus.oidc.client-id") String clientId,
-            @ConfigProperty(name = "quarkus.oidc.credentials.secret") String clientSecret,
-            OidcClients oidcClients
+    public TokenService(@ConfigProperty(name = "quarkus.oidc.auth-server-url") String authServerUrl,
+                        @ConfigProperty(name = "keycloak.realm") String realm,
+                        @ConfigProperty(name = "quarkus.oidc.client-id") String clientId,
+                        @ConfigProperty(name = "quarkus.oidc.credentials.secret") String clientSecret,
+                        @ConfigProperty(name = "quarkus.oidc.scope") String scope,
+                        OidcClients oidcClients
     ) {
         this.authServerUrl = authServerUrl;
         this.realm = realm;
         this.clientId = clientId;
         this.clientSecret = clientSecret;
+        this.scope = scope;
         this.defaultClient = oidcClients.getClient("default-client");
     }
 
@@ -61,22 +64,17 @@ public class TokenService {
         return clientToken.getToken();
     }
 
+
     public String exchangeToken(String subjectToken) {
         try {
             String tokenEndpoint = authServerUrl + "/protocol/openid-connect/token";
 
-            Map<String, String> params = buildTokenExchangeParams(subjectToken);
+            Map<String, List<String>> params = buildTokenExchangeParams(subjectToken);
 
-            String form = params.entrySet().stream()
-                    .map(e -> URLEncoder.encode(e.getKey(), StandardCharsets.UTF_8) + "=" +
-                            URLEncoder.encode(e.getValue(), StandardCharsets.UTF_8))
-                    .collect(Collectors.joining("&"));
+            String form = params.entrySet().stream().flatMap(e -> e.getValue().stream().map(value -> URLEncoder.encode(e.getKey(), StandardCharsets.UTF_8) + "=" + URLEncoder.encode(value, StandardCharsets.UTF_8))).collect(Collectors.joining("&"));
 
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(tokenEndpoint))
-                    .header("Content-Type", "application/x-www-form-urlencoded")
-                    .POST(HttpRequest.BodyPublishers.ofString(form))
-                    .build();
+
+            HttpRequest request = HttpRequest.newBuilder().uri(URI.create(tokenEndpoint)).header("Content-Type", "application/x-www-form-urlencoded").POST(HttpRequest.BodyPublishers.ofString(form)).build();
 
             HttpClient client = HttpClient.newHttpClient();
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -94,14 +92,18 @@ public class TokenService {
         }
     }
 
-    private Map<String, String> buildTokenExchangeParams(String subjectToken) {
-        Map<String, String> params = new HashMap<>();
-        params.put("grant_type", "urn:ietf:params:oauth:grant-type:token-exchange");
-        params.put("subject_token", subjectToken);
-        params.put("subject_token_type", "urn:ietf:params:oauth:token-type:access_token");
-        params.put("requested_token_type", "urn:ietf:params:oauth:token-type:access_token");
-        params.put("client_id", clientId);
-        params.put("client_secret", clientSecret);
+    private Map<String, List<String>> buildTokenExchangeParams(String subjectToken) {
+        Map<String, List<String>> params = new HashMap<>();
+        params.put("grant_type", List.of("urn:ietf:params:oauth:grant-type:token-exchange"));
+        params.put("subject_token", List.of(subjectToken));
+        params.put("subject_token_type", List.of("urn:ietf:params:oauth:token-type:access_token"));
+        params.put("requested_token_type", List.of("urn:ietf:params:oauth:token-type:access_token"));
+        params.put("client_id", List.of(clientId));
+        params.put("client_secret", List.of(clientSecret));
+        params.put("scope", List.of(scope));
+        params.put("audience", List.of("taskclient", "fileclient"));
+
+
         return params;
     }
 
