@@ -22,6 +22,7 @@
         <quarkus-arc.version>3.20.0</quarkus-arc.version>
         <quarkus-rest-client-jackson.version>3.20.0</quarkus-rest-client-jackson.version>
         <quarkus-rest-jackson.version>3.20.0</quarkus-rest-jackson.version>
+        <github-package.url>https://maven.pkg.github.com/thefreded/custom-token-module</github-package.url>
     </properties>
 
     <dependencyManagement>
@@ -147,4 +148,12 @@
             </properties>
         </profile>
     </profiles>
+
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>${github-package.url}</url>
+        </repository>
+    </distributionManagement>
 </project>
